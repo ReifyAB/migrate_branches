@@ -14,6 +14,11 @@ By doing it that way, it will also make sure that:
 
 # usage
 
-```
-GITHUB_TOKEN=xxxx OWNER=Jell OWNER_TYPE=user SOURCE_BRANCH=master TARGET_BRANCH=main ./migrate_branches.sh
+```bash
+GITHUB_TOKEN=xxxx \
+OWNER=Jell \
+OWNER_TYPE=user \
+SOURCE_BRANCH=master \
+TARGET_BRANCH=main \
+./migrate_branches.sh
 ```
