@@ -5,20 +5,9 @@ function usage {
   echo
   echo "usage:"
   echo
-  echo "  OWNER=Jell OWNER_TYPE=user SOURCE_BRANCH=master TARGET_BRANCH=main $0"
+  echo "  OWNER=Jell SOURCE_BRANCH=master TARGET_BRANCH=main $0"
   echo
 }
-
-case ${OWNER_TYPE:-""} in
-  user|org)
-  # all good
-  ;;
-  *)
-    usage
-    echo "OWNER_TYPE should be set to either user or org"
-    exit 1
-    ;;
-esac
 
 if [[ ${OWNER:-""} == "" ]]
 then
@@ -49,15 +38,19 @@ function get_repos_at_page {
        -H 'Accept: application/vnd.github.v3+json' \
        -H "Authorization: token $GITHUB_TOKEN" \
        --get -d "per_page=100&page=${PAGE}" \
-       "https://api.github.com/${OWNER_TYPE}s/${OWNER}/repos" \
+       "https://api.github.com/user/repos" \
     | jq -rc
 }
 
 function migrate_repos {
   REPOS="$1"
 
-  for REPO in $(echo "$REPOS" | jq -r ".[] | select( .default_branch == \"$SOURCE_BRANCH\") | .full_name")
+  for REPO in $(echo "$REPOS" | jq -r ".[] | select( .owner.login == \"$OWNER\" )
+                                           | select( .archived == false )
+                                           | select( .default_branch == \"$SOURCE_BRANCH\")
+                                           | .full_name")
   do
+    echo "migrating ${REPO}..."
     # avoid rate limiting
     sleep 0.5
     curl \
